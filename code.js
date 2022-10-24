@@ -12,7 +12,7 @@ function createTipsSheet() {
         var [startDate, endDate] = getDatesForTipsSheet(sheetObject);
 
     // Tip amounts
-        // Get total tip amounts from manual entry into the sheet or pull credit card tips from Square
+        // Get total tip amounts from manual entry into the sheet and pull credit card tips from Square
             var orders = getAndCombineOrdersData(startDate, endDate, locationId, fullAccessToken);
             var totalTips = 0;
             orders.forEach(function (order) {
@@ -22,7 +22,7 @@ function createTipsSheet() {
         // Clear and write total credit card tips
             sheetObject.getRange(2, 2, 1, 1).clearContent().setValue(totalTips / 100);
 
-    // Get shifts/hours from square
+    // Get shifts with hours from square
         var shifts = getShiftsFromSquare(startDate, endDate, locationId, fullAccessToken);
 
     // Get all team members list from Square
