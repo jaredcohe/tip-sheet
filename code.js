@@ -19,8 +19,19 @@ function createTipsSheet() {
                 totalTips = totalTips + order["total_tip_money"]["amount"];
             });
 
-        // Clear and write total credit card tips
-            sheetObject.getRange(2, 2, 1, 1).clearContent().setValue(totalTips / 100);
+        // Get refunds for the day
+            var refunds = getRefundsForDay(startDate, endDate, locationId, fullAccessToken);
+
+        // For each refund, get order ID, get order
+            var totalRefunds = 0;
+            refunds.forEach(function (refund) {
+                var refundedOrder = getOrderFromId(refund["order_id"], fullAccessToken);
+                var refundedTip = refundedOrder["order"]["return_amounts"]["tip_money"]["amount"];
+                totalRefunds = refundedTip + totalRefunds;
+            });
+
+        // Clear and write total credit card tips minus total refunds
+            sheetObject.getRange(2, 2, 1, 1).clearContent().setValue((totalTips - totalRefunds) / 100);
 
     // Get shifts with hours from square
         var shifts = getShiftsFromSquare(startDate, endDate, locationId, fullAccessToken);
@@ -147,7 +158,7 @@ function getOrdersFromDay(startDate, endDate, locationId, cursor, fullAccessToke
               },
               "state_filter": {
                 "states": [
-                  "COMPLETED", "CANCELED"
+                  "COMPLETED"
                 ]
               }
           },
@@ -190,4 +201,27 @@ function getAndCombineOrdersData(startDate, endDate, locationId, fullAccessToken
     };
 
     return orders;
+};
+
+// Call Square API to get refunds from day to subtract the tips from
+function getRefundsForDay(startDate, endDate, locationId, fullAccessToken) {
+    var options = {
+      'method' : 'get',
+      'contentType': 'application/json',
+      'headers' : { 'Square-Version' : '2022-10-19', 'Authorization' : fullAccessToken }
+    };
+
+    var response = UrlFetchApp.fetch("https://connect.squareup.com/v2/refunds?begin_time=" + encodeURIComponent(startDate) + "&" + "end_time=" + encodeURIComponent(endDate) + "&status=COMPLETED&limit=200&location_id=" + locationId, options);
+    return JSON.parse(response.getContentText())["refunds"];
+}
+
+function getOrderFromId(orderId, fullAccessToken) {
+    var options = {
+      'method' : 'get',
+      'contentType': 'application/json',
+      'headers' : { 'Square-Version' : '2022-10-19', 'Authorization' : fullAccessToken }
+    };
+
+    var response = UrlFetchApp.fetch("https://connect.squareup.com/v2/orders/" + orderId, options);
+    return JSON.parse(response.getContentText());
 };
