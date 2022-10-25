@@ -7,7 +7,7 @@ function createTipsSheet() {
         var fullAccessToken = 'Bearer ' + squareAccessToken;
 
     // Foundational data
-        var sheetObject = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Automated Tips Sheet");
+        var sheetObject = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
         var locationId = sheetObject.getRange(9, 2, 1, 1).getValues()[0][0];
         var [startDate, endDate] = getDatesForTipsSheet(sheetObject);
 
