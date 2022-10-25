@@ -24,11 +24,13 @@ function createTipsSheet() {
 
         // For each refund, get order ID, get order
             var totalRefunds = 0;
-            refunds.forEach(function (refund) {
-                var refundedOrder = getOrderFromId(refund["order_id"], fullAccessToken);
-                var refundedTip = refundedOrder["order"]["return_amounts"]["tip_money"]["amount"];
-                totalRefunds = refundedTip + totalRefunds;
-            });
+            if (refunds) {
+                refunds.forEach(function (refund) {
+                    var refundedOrder = getOrderFromId(refund["order_id"], fullAccessToken);
+                    var refundedTip = refundedOrder["order"]["return_amounts"]["tip_money"]["amount"];
+                    totalRefunds = refundedTip + totalRefunds;
+                });
+            };
 
         // Clear and write total credit card tips minus total refunds
             sheetObject.getRange(2, 2, 1, 1).clearContent().setValue((totalTips - totalRefunds) / 100);
